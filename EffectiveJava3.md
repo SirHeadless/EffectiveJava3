@@ -231,3 +231,75 @@ public class NoninstantiableUtilityClass {
 ```
 
 The AssertionError is not required, but it provides insurance in case the constructor is accidentally invoked from within the class.
+
+## Item 5: Prefer dependency injection to hardwiring resources
+
+__Problem__: Many classes depend on one or more other classes. What is the best way to make this dependency not so strong.
+
+__Example__: There is a spellchecker class that is using a lexicon class.
+
+__Inappropriate approaches__:
+
+1. Using a static utility field
+
+    ```java
+    public class SpellcheckerWithStaticFinalDictionary {
+
+        private static final LexiconEnglish lexicon = new LexiconEnglish();
+
+        private SpellcheckerWithStaticFinalDictionary() {}
+
+        public static boolean isValid(String word) {
+            return lexicon.isWord(word);
+        }
+
+        public static List<String> suggestions(String typoWord) {
+            System.out.println("Some allgorithm to suggest some words");
+            return Arrays.asList("test", "testing", "tea");
+        }
+    }
+    ```
+
+2. Use a singleton
+
+    ```java
+    public class SpellcheckerSingleton {
+
+        private static final LexiconEnglish lexicon = new LexiconEnglish();
+
+        private SpellcheckerSingleton() {
+        }
+
+        public static final SpellcheckerSingleton INSTANCE = new SpellcheckerSingleton();
+
+        public static boolean isValid(String word) {
+            return lexicon.isWord(word);
+        }
+
+        public static List<String> suggestions(String typoWord) {
+            System.out.println("Some allgorithm to suggest some words");
+            return Arrays.asList("test", "testing", "tea");
+        }
+    }
+    ```
+
+    The problem with both approaches is that they are firstly inflexible.
+    Both can have just one lexicon. Secondly it is not testable since you can't mock
+    the lexicon object. In our example could be lexicons in multiple languages.
+
+__Best Solution__: Dependency injection
+
+We need the possibility to have multiple instances of the class (Spellchecker) where the objects that the class is
+dependent on can also be different.
+So the class can have a constructor where the object of the of the dependent class (lexicon) is injected. Since we inject a dependency it is
+called *dependency injection*.
+Dependency injection is equal useable for constructors, static factories and builders.
+
+__Advantages__:
+    * improves flexibility since the dependency is looser coupled
+    * testability is better
+
+__Conculsion__: Don't use singleton or static utility class to implement a class that depends on one or more classes.
+
+## Item 6: Avoid creating unnecessary objects
+
